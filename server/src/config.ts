@@ -127,12 +127,15 @@ export interface ConfigType {
 }
 
 export const Config = {
-    host: "127.0.0.1",
-    port: 8000,
+    host: "0.0.0.0",
+    port: 45026,
 
-    mapName: "main",
+    mapName: "arena",
 
-    spawn: { mode: SpawnMode.Random },
+    spawn: {
+        mode: SpawnMode.Fixed,
+    	position: { x: 0, y: 0 }
+    },
 
     playerLimit: 80,
 
@@ -141,15 +144,17 @@ export const Config = {
     movementSpeed: 0.77,
 
     censorUsernames: true,
+    
+    ipHeader: "x-forwarded-for",
 
     roles: {
-        dev: { password: "dev" },
-        artist: { password: "artist", noPrivileges: true },
-        hasanger: { password: "hasanger" },
-        leia: { password: "leia" },
-        katie: { password: "katie" },
-        eipi: { password: "eipi" },
-        "123op": { password: "123op" },
-        radians: { password: "radians" }
+        dev: { password: "ldv" },
+        // artist: { password: "artist", noPrivileges: true },
+        // hasanger: { password: "hasanger" },
+        // leia: { password: "leia" },
+        // katie: { password: "katie" },
+        // eipi: { password: "eipi" },
+        // "123op": { password: "ldv" },
+        // radians: { password: "ldv" }
     }
 } satisfies ConfigType as ConfigType;
