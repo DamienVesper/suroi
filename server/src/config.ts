@@ -134,7 +134,7 @@ export const Config = {
 
     spawn: {
         mode: SpawnMode.Fixed,
-    	position: { x: 0, y: 0 }
+    	position: { x: 256, y: 256 }
     },
 
     playerLimit: 80,
