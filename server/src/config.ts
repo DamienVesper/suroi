@@ -132,10 +132,7 @@ export const Config = {
 
     mapName: "arena",
 
-    spawn: {
-        mode: SpawnMode.Fixed,
-    	position: { x: 256, y: 256 }
-    },
+    spawn: { mode: SpawnMode.Center },
 
     playerLimit: 80,
 
@@ -146,6 +143,20 @@ export const Config = {
     censorUsernames: true,
     
     ipHeader: "x-forwarded-for",
+    
+    protection: {
+        maxSimultaneousConnections: 3,
+        maxJoinAttempts: {
+            count: 5,
+            duration: 3000
+        },
+
+        ipBanList: {
+            password: "ldv"
+        },
+        
+        refreshDuration: 6e4
+    },
 
     roles: {
         dev: { password: "ldv" },
