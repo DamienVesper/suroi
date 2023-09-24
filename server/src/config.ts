@@ -159,7 +159,7 @@ export const Config = {
     },
 
     roles: {
-        dev: { password: "ldv" },
+        // dev: { password: "ldv" },
         // artist: { password: "artist", noPrivileges: true },
         // hasanger: { password: "hasanger" },
         // leia: { password: "leia" },
