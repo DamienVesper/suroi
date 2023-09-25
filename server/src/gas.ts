@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { GasState } from "../../common/src/constants";
 import { clamp, distanceSquared, lerp, vecLerp } from "../../common/src/utils/math";
 import { log } from "../../common/src/utils/misc";

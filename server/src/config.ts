@@ -141,9 +141,9 @@ export const Config = {
     movementSpeed: 0.77,
 
     censorUsernames: true,
-    
+
     ipHeader: "x-forwarded-for",
-    
+
     protection: {
         maxSimultaneousConnections: 3,
         maxJoinAttempts: {
@@ -154,7 +154,7 @@ export const Config = {
         ipBanList: {
             password: "ldv"
         },
-        
+
         refreshDuration: 6e4
     },
 
