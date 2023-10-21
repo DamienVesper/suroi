@@ -1,12 +1,3 @@
-export interface ConfigType {
-    readonly regions: Record<string, {
-        name: string
-        address: string
-        https: boolean
-    }>
-    readonly defaultRegion: string
-}
-
 export const Config = {
     regions: {
         dev: { name: "Local Server", address: "dv.suroi.io", https: true },
@@ -17,3 +8,12 @@ export const Config = {
     },
     defaultRegion: "dev"
 } satisfies ConfigType as ConfigType;
+
+export interface ConfigType {
+    readonly regions: Record<string, {
+        name: string
+        address: string
+        https: boolean
+    }>
+    readonly defaultRegion: string
+}

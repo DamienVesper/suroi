@@ -96,3 +96,5 @@ export const GasStages: GasStage[] = [
         dps: 15
     }
 ];
+
+//console.log(GasStages.reduce((a, b) => a + b.duration, 0));

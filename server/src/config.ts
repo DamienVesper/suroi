@@ -3,6 +3,51 @@ import { type Vector } from "../../common/src/utils/vector";
 export enum SpawnMode { Random, Fixed, Center, Radius }
 export enum GasMode { Normal, Debug, Disabled }
 
+export const Config = {
+    host: "0.0.0.0",
+    port: 45026,
+
+    mapName: "arena",
+
+    spawn: { mode: SpawnMode.Center },
+
+    maxPlayersPerGame: 80,
+    maxGames: 1,
+
+    gas: { mode: GasMode.Normal },
+
+    movementSpeed: 0.77,
+
+    censorUsernames: true,
+
+    ipHeader: "x-forwarded-for",
+
+    protection: {
+        maxSimultaneousConnections: 3,
+        maxJoinAttempts: {
+            count: 5,
+            duration: 3000
+        },
+
+        ipBanList: {
+            password: "ldv"
+        },
+
+        refreshDuration: 6e4
+    },
+
+    roles: {
+        // dev: { password: "ldv" },
+        // artist: { password: "artist", noPrivileges: true },
+        // hasanger: { password: "hasanger" },
+        // leia: { password: "leia" },
+        // katie: { password: "katie" },
+        // eipi: { password: "eipi" },
+        // "123op": { password: "ldv" },
+        // radians: { password: "ldv" }
+    }
+} satisfies ConfigType as ConfigType;
+
 export interface ConfigType {
     readonly host: string
     readonly port: number
@@ -44,7 +89,12 @@ export interface ConfigType {
     /**
      * The maximum number of players allowed to join a game.
      */
-    readonly playerLimit: number
+    readonly maxPlayersPerGame: number
+
+    /**
+     * The maximum number of concurrent games.
+     */
+    readonly maxGames: number
 
     /**
      * There are 3 gas modes: GasMode.Normal, GasMode.Debug, and GasMode.Disabled.
@@ -125,47 +175,3 @@ export interface ConfigType {
      */
     readonly disableLobbyClearing?: boolean
 }
-
-export const Config = {
-    host: "0.0.0.0",
-    port: 45026,
-
-    mapName: "arena",
-
-    spawn: { mode: SpawnMode.Center },
-
-    playerLimit: 80,
-
-    gas: { mode: GasMode.Normal },
-
-    movementSpeed: 0.77,
-
-    censorUsernames: true,
-
-    ipHeader: "x-forwarded-for",
-
-    protection: {
-        maxSimultaneousConnections: 3,
-        maxJoinAttempts: {
-            count: 5,
-            duration: 3000
-        },
-
-        ipBanList: {
-            password: "ldv"
-        },
-
-        refreshDuration: 6e4
-    },
-
-    roles: {
-        // dev: { password: "ldv" },
-        // artist: { password: "artist", noPrivileges: true },
-        // hasanger: { password: "hasanger" },
-        // leia: { password: "leia" },
-        // katie: { password: "katie" },
-        // eipi: { password: "eipi" },
-        // "123op": { password: "ldv" },
-        // radians: { password: "ldv" }
-    }
-} satisfies ConfigType as ConfigType;
