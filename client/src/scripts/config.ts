@@ -1,6 +1,6 @@
 export const Config = {
     regions: {
-        dev: { name: "Local Server", address: "dv.suroi.io", https: true },
+        dev: { name: "Local Server", address: "dv.suroi.io", https: true }
         // na: { name: "North America", address: "suroi.io", https: true },
         // eu: { name: "Europe", address: "eu.suroi.io", https: true },
         // sa: { name: "South America", address: "sa.suroi.io", https: true },
