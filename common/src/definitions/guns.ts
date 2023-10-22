@@ -385,7 +385,7 @@ export const Guns: GunDefinition[] = [
     },
     {
         idString: "g19",
-        name: "G19",
+        name: "Scoped Glock",
         itemType: ItemType.Gun,
         ammoType: "9mm",
         ammoSpawnAmount: 60,
@@ -395,8 +395,8 @@ export const Guns: GunDefinition[] = [
         recoilMultiplier: 0.8,
         recoilDuration: 90,
         fireMode: FireMode.Single,
-        shotSpread: 7,
-        moveSpread: 7,
+        shotSpread: 0,
+        moveSpread: 0,
         length: 5.8,
         fists: {
             left: v(70, 4),
@@ -410,10 +410,10 @@ export const Guns: GunDefinition[] = [
         capacity: 15,
         reloadTime: 1.5,
         ballistics: {
-            damage: 11.75,
+            damage: 1000,
             obstacleMultiplier: 1,
-            speed: 0.14,
-            maxDistance: 120
+            speed: 1,
+            maxDistance: 250
         }
     },
     {
