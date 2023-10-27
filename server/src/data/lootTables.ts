@@ -81,10 +81,10 @@ export const LootTables: Record<string, LootTable> = {
                 { item: "15x_scope", weight: 0.0025 }
             ],
             [
-                { item: "tango_51", spawnSeparately: true, weight: 50 },
-                { item: "tango_51", spawnSeparately: true, count: 2, weight: 20 },
-                { item: "tango_51", spawnSeparately: true, count: 3, weight: 2.5 },
-                { item: "tango_51", spawnSeparately: true, count: 4, weight: 0.001 },
+                { item: "tango_51", spawnSeparately: true, weight: 60 },
+                { item: "tango_51", spawnSeparately: true, count: 2, weight: 30 },
+                { item: "tango_51", spawnSeparately: true, count: 3, weight: 3.5 },
+                { item: "tango_51", spawnSeparately: true, count: 4, weight: 0.1 },
                 { item: "tango_51", spawnSeparately: true, count: 5, weight: 0.0000001 }
             ]
         ]
@@ -236,7 +236,7 @@ export const LootTiers: Record<string, WeightedItem[]> = {
         { item: "hp18", weight: 1.25 },
         { item: "micro_uzi", weight: 1.25 },
         { item: "aug", weight: 1 },
-        { item: "m37", weight: 1 },
+        { item: "model_37", weight: 1 },
         { item: "ak47", weight: 0.8 },
         { item: "m3k", weight: 0.5 },
         { item: "m16a4", weight: 0.1 },
@@ -288,7 +288,7 @@ export const LootTiers: Record<string, WeightedItem[]> = {
         { item: "aug", weight: 1.05 },
         { item: "hp18", weight: 1 },
         { item: "mp40", weight: 1 },
-        { item: "m37", weight: 1 },
+        { item: "model_37", weight: 1 },
         { item: "m3k", weight: 0.8 },
         { item: "arx160", weight: 0.8 },
         { item: "flues", weight: 0.8 },
