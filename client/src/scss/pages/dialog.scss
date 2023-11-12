@@ -30,28 +30,20 @@
 
 #report-id-container {
     display: flex;
+    flex-direction: column;
+    justify-content: center;
     align-items: center;
     gap: 5px;
 }
 
-#report-id-input {
-    color: black;
-    font-size: 16px;
-    width: 235px;
-    padding: 5px 8px;
-    border-radius: 8px;
-}
-
-#btn-copy-report-id {
-    display: inline-block;
-    font-size: 16px;
-    height: auto;
-    padding: 6px 12px;
+#report-id {
+    font-size: 50px;
+    font-family: monospace;
 }
 
 #customize-menu {
     background-color: #3e8235;
-    max-width: 800px;
+    max-width: 850px;
 }
 
 // TODO Refactor this, make classes
@@ -184,12 +176,14 @@
     #emotes-list {
         overflow-y: scroll;
         flex-grow: 1;
-        display: flex;
-        flex-direction: column;
+        display: grid;
+        //flex-direction: column;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 8px;
 
         .emotes-list-item-container {
             display: flex;
+            flex-direction: column;
             gap: 10px;
             align-items: center;
             border: 5px solid transparent;
@@ -418,10 +412,11 @@
         #tab-keybinds-content {
             #keybind-clear-tooltip {
                 border: 2px solid gray;
-                padding: 3px;
+                border-radius: 10px;
+                padding: 7px;
                 background-color: lighten($transparent_bg, 30%);
             }
-            
+
             .modal-item:not(:last-child) {
                 div.settings-title {
                     width: 100%;
@@ -451,6 +446,7 @@
             position: relative;
             top: 3px;
             margin-right: 5px;
+            @include drop-shadow;
         }
     }
 
@@ -464,6 +460,10 @@
         font-weight: bold;
         font-size: 16px;
         @include text-shadow;
+
+        i {
+            color: red;
+        }
     }
 
     .modal-item {

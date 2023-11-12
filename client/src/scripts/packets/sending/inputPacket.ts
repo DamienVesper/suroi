@@ -1,11 +1,9 @@
 import {
-    INPUT_ACTIONS_BITS,
     MAX_MOUSE_DISTANCE,
-    ObjectCategory,
     PacketType
 } from "../../../../../common/src/constants";
-import { ObjectType } from "../../../../../common/src/utils/objectType";
-import { type SuroiBitStream } from "../../../../../common/src/utils/suroiBitStream";
+import { Loots } from "../../../../../common/src/definitions/loots";
+import { INPUT_ACTIONS_BITS, type SuroiBitStream } from "../../../../../common/src/utils/suroiBitStream";
 import { SendingPacket } from "../../types/sendingPacket";
 
 export class InputPacket extends SendingPacket {
@@ -27,19 +25,20 @@ export class InputPacket extends SendingPacket {
         }
 
         stream.writeBoolean(inputs.attacking);
+
+        stream.writeBoolean(inputs.turning);
+        if (inputs.turning) {
+            stream.writeRotation(inputs.resetAttacking ? inputs.shootOnReleaseAngle : inputs.rotation, 16);
+            if (!inputs.isMobile) stream.writeFloat(inputs.distanceToMouse, 0, MAX_MOUSE_DISTANCE, 8);
+            inputs.turning = false;
+        }
+
         if (inputs.resetAttacking) {
             inputs.attacking = false;
             inputs.resetAttacking = false;
         }
 
-        stream.writeBoolean(inputs.turning);
-        if (inputs.turning) {
-            stream.writeRotation(inputs.rotation, 16);
-            if (!inputs.isMobile) stream.writeFloat(inputs.distanceToMouse, 0, MAX_MOUSE_DISTANCE, 8);
-            inputs.turning = false;
-        }
-
-        stream.writeBits(inputs.actions.length, 4);
+        stream.writeBits(inputs.actions.length, 3);
 
         for (const action of inputs.actions) {
             stream.writeBits(action.type, INPUT_ACTIONS_BITS);
@@ -47,11 +46,12 @@ export class InputPacket extends SendingPacket {
             if ("slot" in action) {
                 stream.writeBits(action.slot, 2);
             }
+
             if ("item" in action) {
-                stream.writeObjectTypeNoCategory(ObjectType.fromString(ObjectCategory.Loot, action.item.idString));
+                Loots.writeToStream(stream, action.item);
             }
         }
 
-        inputs.actions = [];
+        inputs.actions.length = 0;
     }
 }

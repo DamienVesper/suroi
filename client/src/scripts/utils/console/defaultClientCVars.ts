@@ -16,12 +16,12 @@ export const defaultClientCVars: SimpleCVarMapping = Object.freeze({
     },
     cv_loadout_skin: {
         name: "cv_loadout_skin",
-        value: "forest_camo",
+        value: "hazel_jumpsuit",
         flags: { archive: true, readonly: false, cheat: false }
     },
     cv_loadout_crosshair: {
         name: "cv_loadout_crosshair",
-        value: "default",
+        value: 0,
         flags: { archive: true, readonly: false, cheat: false }
     },
     cv_loadout_top_emote: {
@@ -94,23 +94,18 @@ export const defaultClientCVars: SimpleCVarMapping = Object.freeze({
         value: true,
         flags: { archive: true, readonly: false, cheat: false }
     },
-    cv_animate_rotation: {
-        name: "cv_animate_rotation",
-        value: "client",
-        flags: { archive: true, readonly: false, cheat: false }
-    },
     cv_killfeed_style: {
         name: "cv_killfeed_style",
         value: "text",
         flags: { archive: true, readonly: false, cheat: false }
     },
-    cv_rotation_smoothing: {
-        name: "cv_rotation_smoothing",
+    cv_movement_smoothing: {
+        name: "cv_movement_smoothing",
         value: true,
         flags: { archive: true, readonly: false, cheat: false }
     },
-    cv_movement_smoothing: {
-        name: "cv_movement_smoothing",
+    cv_antialias: {
+        name: "cv_antialias",
         value: true,
         flags: { archive: true, readonly: false, cheat: false }
     },
@@ -141,12 +136,12 @@ export const defaultClientCVars: SimpleCVarMapping = Object.freeze({
     },
     cv_rules_acknowledged: {
         name: "cv_rules_acknowledged",
-        value: true,
+        value: false,
         flags: { archive: true, readonly: false, cheat: false }
     },
     cv_hide_rules_button: {
         name: "cv_hide_rules_button",
-        value: true,
+        value: false,
         flags: { archive: true, readonly: false, cheat: false }
     },
     cv_console_width: {
@@ -271,5 +266,5 @@ export const defaultBinds = Object.freeze({
     toggle_map: ["G", "M"],
     toggle_minimap: ["N"],
     "+emote_wheel": ["Mouse2"],
-    toggle_console: ["`"]
+    toggle_console: [] as string[]
 });

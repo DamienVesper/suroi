@@ -43,6 +43,7 @@ export type ObstacleDefinition = ObjectDefinition & {
     readonly locked?: boolean
     readonly openOnce?: boolean
     readonly animationDuration?: number
+    readonly doorSound?: string
 } & ({
     readonly operationStyle?: "swivel"
     readonly hingeOffset: Vector
@@ -59,6 +60,7 @@ export type ObstacleDefinition = ObjectDefinition & {
     // obstacle will interact will all obstacles with that id string from the parent building
     readonly interactType?: string
     readonly interactDelay?: number
+    readonly emitParticles?: boolean
 } | {
     readonly role?: ObstacleSpecialRoles.Wall | ObstacleSpecialRoles.Window
 });
@@ -70,6 +72,7 @@ export const Materials: string[] = [
     "crate",
     "metal",
     "wood",
+    "pumpkin",
     "glass",
     "porcelain",
     "cardboard",
@@ -117,23 +120,6 @@ function makeCrate(idString: string, name: string, options: Partial<ObstacleDefi
     return definition as ObstacleDefinition;
 }
 
-function makeSpecialCrate(idString: string, name: string): ObstacleDefinition {
-    return {
-        idString,
-        name,
-        material: "crate",
-        health: 100,
-        scale: {
-            spawnMin: 1,
-            spawnMax: 1,
-            destroy: 0.6
-        },
-        hitbox: RectangleHitbox.fromRect(6.1, 6.1),
-        rotationMode: RotationMode.None,
-        hasLoot: true
-    };
-}
-
 function makeHouseWall(lengthNumber: string, hitbox: Hitbox): ObstacleDefinition {
     return {
         idString: `house_wall_${lengthNumber}`,
@@ -179,9 +165,9 @@ function makeConcreteWall(idString: string, name: string, hitbox: Hitbox, indest
     };
 }
 
-function makeContainerWalls(id: number, open: "open2" | "open1" | "closed", tint?: number): ObstacleDefinition {
+function makeContainerWalls(id: number, style: "open2" | "open1" | "closed", tint?: number): ObstacleDefinition {
     let hitbox: Hitbox;
-    switch (open) {
+    switch (style) {
         case "open2":
             hitbox = new ComplexHitbox(
                 RectangleHitbox.fromRect(1.85, 28, v(6.1, 0)),
@@ -200,7 +186,7 @@ function makeContainerWalls(id: number, open: "open2" | "open1" | "closed", tint
             hitbox = RectangleHitbox.fromRect(14, 28);
             break;
     }
-    const invisible = open === "closed";
+    const invisible = style === "closed";
     return {
         idString: `container_walls_${id}`,
         name: `Container Walls ${id}`,
@@ -219,8 +205,9 @@ function makeContainerWalls(id: number, open: "open2" | "open1" | "closed", tint
         rotationMode: RotationMode.Limited,
         role: ObstacleSpecialRoles.Wall,
         reflectBullets: true,
+        zIndex: ZIndexes.Ground + 1,
         frames: {
-            base: open !== "closed" ? `container_walls_${open}` : undefined,
+            base: invisible ? undefined : `container_walls_${style}`,
             particle: "metal_particle"
         },
         tint
@@ -290,6 +277,21 @@ export const Obstacles = new ObjectDefinitions<ObstacleDefinition>(
             rotationMode: RotationMode.Full,
             variations: 7,
             particleVariations: 2
+        },
+        {
+            idString: "pumpkin",
+            name: "Pumpkin",
+            material: "pumpkin",
+            health: 100,
+            scale: {
+                spawnMin: 0.9,
+                spawnMax: 1.1,
+                destroy: 0.5
+            },
+            hitbox: new CircleHitbox(2.4),
+            spawnHitbox: new CircleHitbox(3),
+            rotationMode: RotationMode.Full,
+            hasLoot: true
         },
         {
             idString: "flint_stone",
@@ -363,7 +365,24 @@ export const Obstacles = new ObjectDefinitions<ObstacleDefinition>(
             rotationMode: RotationMode.None,
             hideOnMap: true
         }),
-        makeSpecialCrate("melee_crate", "Melee Crate"),
+        {
+            idString: "melee_crate",
+            name: "Melee Crate",
+            material: "crate",
+            health: 100,
+            scale: {
+                spawnMin: 1,
+                spawnMax: 1,
+                destroy: 0.6
+            },
+            hitbox: RectangleHitbox.fromRect(6.1, 6.1),
+            rotationMode: RotationMode.None,
+            hasLoot: true,
+            frames: {
+                particle: "crate_particle",
+                residue: "regular_crate_residue"
+            }
+        },
         {
             idString: "barrel",
             name: "Barrel",
@@ -645,6 +664,7 @@ export const Obstacles = new ObjectDefinitions<ObstacleDefinition>(
             role: ObstacleSpecialRoles.Door,
             locked: true,
             openOnce: true,
+            doorSound: "vault_door",
             animationDuration: 2000,
             hingeOffset: v(-5.5, -1),
             zIndex: ZIndexes.ObstaclesLayer3,
@@ -1571,6 +1591,7 @@ export const Obstacles = new ObjectDefinitions<ObstacleDefinition>(
                 particle: "metal_particle"
             },
             role: ObstacleSpecialRoles.Activatable,
+            emitParticles: true,
             requiredItem: "gas_can",
             interactType: "vault_door",
             interactDelay: 2000,
@@ -1892,6 +1913,7 @@ export const Obstacles = new ObjectDefinitions<ObstacleDefinition>(
             ),
             rotationMode: RotationMode.Limited,
             noResidue: true,
+            particleVariations: 2,
             frames: {
                 particle: "rock_particle"
             }

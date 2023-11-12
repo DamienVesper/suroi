@@ -1,4 +1,4 @@
-import { SuroiBitStream } from "../../common/src/utils/suroiBitStream";
+import { OBJECT_ID_BITS, SuroiBitStream } from "../../common/src/utils/suroiBitStream";
 import { Gas } from "./gas";
 import { Grid } from "./utils/grid";
 import { type GameObject } from "./types/gameObject";
@@ -12,8 +12,7 @@ import { Bullet, type DamageRecord, type ServerBulletOptions } from "./objects/b
 import { KillFeedPacket } from "./packets/sending/killFeedPacket";
 import {
     KILL_LEADER_MIN_KILLS,
-    KillFeedMessageType, OBJECT_ID_BITS,
-    ObjectCategory,
+    KillFeedMessageType,
     TICKS_PER_SECOND
 } from "../../common/src/constants";
 import { Maps } from "./data/maps";
@@ -23,19 +22,18 @@ import { MapPacket } from "./packets/sending/mapPacket";
 import { UpdatePacket } from "./packets/sending/updatePacket";
 import { endGame, type PlayerContainer } from "./server";
 import { GameOverPacket } from "./packets/sending/gameOverPacket";
-import { log } from "../../common/src/utils/misc";
 import { type WebSocket } from "uWebSockets.js";
-import { ObjectType } from "../../common/src/utils/objectType";
 import { random, randomPointInsideCircle } from "../../common/src/utils/random";
 import { v, type Vector } from "../../common/src/utils/vector";
 import { distanceSquared } from "../../common/src/utils/math";
 import { JoinedPacket } from "./packets/sending/joinedPacket";
-import { removeFrom } from "./utils/misc";
-import { Loots, type LootDefinition } from "../../common/src/definitions/loots";
+import { Logger, removeFrom } from "./utils/misc";
+import { type LootDefinition, Loots } from "../../common/src/definitions/loots";
 import { type GunItem } from "./inventory/gunItem";
 import { IDAllocator } from "./utils/idAllocator";
-import { type ReferenceTo, reifyDefinition } from "../../common/src/utils/objectDefinitions";
+import { type ReifiableDef, type ReferenceTo } from "../../common/src/utils/objectDefinitions";
 import { type ExplosionDefinition } from "../../common/src/definitions/explosions";
+import { CircleHitbox } from "../../common/src/utils/hitbox";
 
 export class Game {
     readonly _id: number;
@@ -265,7 +263,7 @@ export class Game {
             if (this.tickTimes.length >= 200) {
                 const mspt = this.tickTimes.reduce((a, b) => a + b) / this.tickTimes.length;
 
-                log(`Game #${this._id} | Avg ms/tick: ${mspt.toFixed(2)} | Load: ${((mspt / TICKS_PER_SECOND) * 100).toFixed(1)}%`);
+                Logger.log(`Game #${this._id} | Avg ms/tick: ${mspt.toFixed(2)} | Load: ${((mspt / TICKS_PER_SECOND) * 100).toFixed(1)}%`);
                 this.tickTimes = [];
             }
 
@@ -277,23 +275,21 @@ export class Game {
     get killLeader(): Player | undefined { return this._killLeader; }
 
     updateKillLeader(player: Player): void {
-        const oldKillLeader: Player | undefined = this._killLeader;
+        const oldKillLeader = this._killLeader;
 
         if (player.kills > (this._killLeader?.kills ?? (KILL_LEADER_MIN_KILLS - 1))) {
             this._killLeader = player;
 
             if (oldKillLeader !== this._killLeader) {
-                this.killFeedMessages.add(new KillFeedPacket(this._killLeader, KillFeedMessageType.KillLeaderAssigned));
+                this._sendKillFeedMessage(KillFeedMessageType.KillLeaderAssigned);
             }
-        }
-
-        if (player === oldKillLeader && this._killLeader !== undefined) {
-            this.killFeedMessages.add(new KillFeedPacket(this._killLeader, KillFeedMessageType.KillLeaderUpdated));
+        } else if (player === oldKillLeader) {
+            this._sendKillFeedMessage(KillFeedMessageType.KillLeaderUpdated);
         }
     }
 
     killLeaderDead(): void {
-        if (this._killLeader !== undefined) this.killFeedMessages.add(new KillFeedPacket(this._killLeader, KillFeedMessageType.KillLeaderDead));
+        this._sendKillFeedMessage(KillFeedMessageType.KillLeaderDead);
         let newKillLeader: Player | undefined;
         for (const player of this.livingPlayers) {
             if (player.kills > (newKillLeader?.kills ?? (KILL_LEADER_MIN_KILLS - 1))) {
@@ -301,16 +297,26 @@ export class Game {
             }
         }
         this._killLeader = newKillLeader;
-        if (this._killLeader !== undefined) this.killFeedMessages.add(new KillFeedPacket(this._killLeader, KillFeedMessageType.KillLeaderAssigned));
+        this._sendKillFeedMessage(KillFeedMessageType.KillLeaderAssigned);
+    }
+
+    private _sendKillFeedMessage(messageType: KillFeedMessageType): void {
+        if (this._killLeader !== undefined) this.killFeedMessages.add(new KillFeedPacket(this._killLeader, messageType));
     }
 
     addPlayer(socket: WebSocket<PlayerContainer>): Player {
-        let spawnPosition = v(0, 0);
+        let spawnPosition = v(this.map.width / 2, this.map.height / 2);
         switch (Config.spawn.mode) {
             case SpawnMode.Random: {
                 let foundPosition = false;
                 while (!foundPosition) {
-                    spawnPosition = this.map.getRandomPositionFor(ObjectType.categoryOnly(ObjectCategory.Player));
+                    spawnPosition = this.map.getRandomPositionFor(
+                        new CircleHitbox(5),
+                        1,
+                        0,
+                        undefined,
+                        500) ??
+                        spawnPosition;
                     if (!(distanceSquared(spawnPosition, this.gas.currentPosition) >= this.gas.newRadius ** 2)) foundPosition = true;
                 }
                 break;
@@ -319,16 +325,11 @@ export class Game {
                 spawnPosition = Config.spawn.position;
                 break;
             }
-            case SpawnMode.Center: {
-                spawnPosition = v(Maps[Config.mapName].width / 2, Maps[Config.mapName].height / 2);
-                break;
-            }
             case SpawnMode.Radius: {
                 spawnPosition = randomPointInsideCircle(Config.spawn.position, Config.spawn.radius);
                 break;
             }
         }
-
         // Player is added to the players array when a JoinPacket is received from the client
         return new Player(this, socket, spawnPosition);
     }
@@ -352,10 +353,10 @@ export class Game {
             this.startTimeoutID = setTimeout(() => {
                 this._started = true;
                 this.gas.advanceGas();
-            }, 5000);
+            }, 3000);
         }
 
-        log(`Game #${this.id} | "${player.name}" joined`);
+        Logger.log(`Game #${this.id} | "${player.name}" joined`);
     }
 
     removePlayer(player: Player): void {
@@ -403,10 +404,10 @@ export class Game {
      * that many `Loot` objects, but rather how many the singular `Loot` object will contain)
      * @returns The created loot object
      */
-    addLoot<Def extends LootDefinition = LootDefinition>(definition: Def | ReferenceTo<Def>, position: Vector, count?: number): Loot<Def> {
-        const loot = new Loot<Def>(
+    addLoot(definition: ReifiableDef<LootDefinition>, position: Vector, count?: number): Loot {
+        const loot = new Loot(
             this,
-            reifyDefinition(definition, Loots),
+            Loots.reify(definition),
             position,
             count
         );

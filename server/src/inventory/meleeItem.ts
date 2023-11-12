@@ -100,8 +100,9 @@ export class MeleeItem extends InventoryItem<MeleeDefinition> {
     }
 
     override useItem(): void {
-        if (this.owner.game.now - this._lastUse > this.definition.cooldown) {
-            this._useItemNoDelayCheck(true);
-        }
+        super._bufferAttack(
+            this.definition.cooldown,
+            this._useItemNoDelayCheck.bind(this, true)
+        );
     }
 }

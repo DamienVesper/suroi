@@ -10,6 +10,7 @@ import { type MapPacket } from "../packets/receiving/mapPacket";
 import { COLORS, HITBOX_DEBUG_MODE, PIXI_SCALE } from "../utils/constants";
 import { SuroiSprite, drawHitbox } from "../utils/pixi";
 import { Gas } from "./gas";
+import { MODE } from "../../../../common/src/definitions/modes";
 
 export class Minimap {
     container = new Container();
@@ -53,7 +54,7 @@ export class Minimap {
         window.addEventListener("resize", this.resize.bind(this));
         this.resize();
 
-        if (this.game.console.getConfig("cv_minimap_minimized")) this.toggleMiniMap();
+        if (this.game.console.getBuiltInCVar("cv_minimap_minimized")) this.toggleMiniMap();
 
         this.indicator.scale.set(0.1);
 
@@ -106,7 +107,7 @@ export class Minimap {
         terrainGraphics.drawRect(realWidth, -margin, margin, realHeight + margin * 2);
         terrainGraphics.endFill();
 
-        const drawTerrain = (ctx: Graphics, scale: number): void => {
+        const drawTerrain = (ctx: Graphics, scale: number, gridWidth: number): void => {
             ctx.zIndex = ZIndexes.Ground;
             ctx.beginFill();
 
@@ -151,7 +152,7 @@ export class Minimap {
             ctx.lineStyle({
                 color: 0x000000,
                 alpha: 0.25,
-                width: 2
+                width: gridWidth
             });
 
             for (let x = 0; x <= width; x += GRID_SIZE) {
@@ -187,8 +188,8 @@ export class Minimap {
                 }
             }
         };
-        drawTerrain(terrainGraphics, PIXI_SCALE);
-        drawTerrain(mapGraphics, 1);
+        drawTerrain(terrainGraphics, PIXI_SCALE, this.game.console.getBuiltInCVar("cv_antialias") ? 2 : 4);
+        drawTerrain(mapGraphics, 1, 2);
 
         this.game.camera.addObject(terrainGraphics);
 
@@ -199,13 +200,15 @@ export class Minimap {
         for (const obstacle of mapPacket.obstacles) {
             const definition = obstacle.type;
 
-            let textureId = definition.idString;
-            if (obstacle.variation) {
-                textureId += `_${obstacle.variation + 1}`;
-            }
+            let texture = definition.frames?.base ?? definition.idString;
+
+            if (obstacle.variation !== undefined) texture += `_${obstacle.variation + 1}`;
+
+            const reskin = MODE.reskin;
+            if (reskin && definition.idString in reskin.obstacles) texture += `_${reskin.suffix}`;
 
             // Create the object image
-            const image = new SuroiSprite(`${textureId}`)
+            const image = new SuroiSprite(texture)
                 .setVPos(obstacle.position).setRotation(obstacle.rotation)
                 .setZIndex(definition.zIndex ?? ZIndexes.ObstaclesLayer1);
 
@@ -233,7 +236,7 @@ export class Minimap {
                 const sprite = new SuroiSprite(image.key)
                     .setVPos(addAdjust(building.position, image.position, building.orientation))
                     .setRotation(building.rotation)
-                    .setZIndex(ZIndexes.BuildingsCeiling);
+                    .setZIndex(definition.ceilingZIndex ?? ZIndexes.BuildingsCeiling);
 
                 sprite.scale.set(1 / PIXI_SCALE);
                 if (image.tint !== undefined) sprite.setTint(image.tint);
@@ -458,7 +461,7 @@ export class Minimap {
     }
 
     updateTransparency(): void {
-        this.container.alpha = this.game.console.getConfig(this.expanded ? "cv_map_transparency" : "cv_minimap_transparency");
+        this.container.alpha = this.game.console.getBuiltInCVar(this.expanded ? "cv_map_transparency" : "cv_minimap_transparency");
     }
 
     toggleMiniMap(noSwitchToggle = false): void {
@@ -467,7 +470,7 @@ export class Minimap {
         this.switchToSmallMap();
         this.container.visible = this.visible;
         this.borderContainer.toggle(this.visible);
-        this.game.console.setConfig("cv_minimap_minimized", !this.visible);
+        this.game.console.setBuiltInCVar("cv_minimap_minimized", !this.visible);
         if (!noSwitchToggle) {
             $("#toggle-hide-minimap").prop("checked", !this.visible);
         }

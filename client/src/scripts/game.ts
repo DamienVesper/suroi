@@ -1,6 +1,6 @@
 import $ from "jquery";
 
-import { type Application, Container } from "pixi.js";
+import { Application, Container } from "pixi.js";
 import { InputActions, ObjectCategory, PacketType, PlayerActions, TICKS_PER_SECOND, ZIndexes } from "../../../common/src/constants";
 import { Scopes } from "../../../common/src/definitions/scopes";
 import { CircleHitbox } from "../../../common/src/utils/hitbox";
@@ -19,7 +19,6 @@ import { ParticleManager } from "./objects/particles";
 import { Player } from "./objects/player";
 import { GameOverPacket, gameOverScreenTimeout } from "./packets/receiving/gameOverPacket";
 import { JoinedPacket } from "./packets/receiving/joinedPacket";
-import { KillPacket } from "./packets/receiving/killPacket";
 import { KillFeedPacket } from "./packets/receiving/killFeedPacket";
 import { PingedPacket } from "./packets/receiving/pingedPacket";
 import { PingPacket } from "./packets/sending/pingPacket";
@@ -29,7 +28,7 @@ import { type GameObject } from "./types/gameObject";
 import { PlayerManager } from "./utils/playerManager";
 import { MapPacket } from "./packets/receiving/mapPacket";
 import { PickupPacket } from "./packets/receiving/pickupPacket";
-import { PIXI_SCALE, UI_DEBUG_MODE } from "./utils/constants";
+import { COLORS, PIXI_SCALE, UI_DEBUG_MODE } from "./utils/constants";
 import { ReportPacket } from "./packets/receiving/reportPacket";
 import { JoinPacket } from "./packets/sending/joinPacket";
 import { InputPacket } from "./packets/sending/inputPacket";
@@ -40,12 +39,10 @@ import { Gas } from "./rendering/gas";
 import { Minimap } from "./rendering/map";
 import { type Tween } from "./utils/tween";
 import { UpdatePacket } from "./packets/receiving/updatePacket";
-import { type ObstacleDefinition } from "../../../common/src/definitions/obstacles";
-import { type LootDefinition } from "../../../common/src/definitions/loots";
-import { type BuildingDefinition } from "../../../common/src/definitions/buildings";
 import { GameConsole } from "./utils/console/gameConsole";
 import { setUpCommands } from "./utils/console/commands";
 import { setupUI } from "./ui";
+import { type ObjectsNetData } from "../../../common/src/utils/objectsSerializations";
 
 export class Game {
     socket!: WebSocket;
@@ -74,7 +71,7 @@ export class Game {
 
     gas!: Gas;
 
-    readonly pixi: Application;
+    readonly pixi: Application<HTMLCanvasElement>;
     readonly soundManager: SoundManager;
     readonly particleManager = new ParticleManager(this);
     readonly map: Minimap;
@@ -92,38 +89,48 @@ export class Game {
 
     readonly tweens = new Set<Tween<unknown>>();
 
-    constructor(pixi: Application) {
-        this.pixi = pixi;
+    constructor() {
+        this.inputManager.setupInputs();
+        this.console.readFromLocalStorage();
+
+        // Initialize the Application object
+        this.pixi = new Application({
+            resizeTo: window,
+            background: COLORS.grass,
+            antialias: this.console.getBuiltInCVar("cv_antialias"),
+            autoDensity: true,
+            resolution: window.devicePixelRatio || 1
+        });
+
+        $("#game-ui").append(this.pixi.view);
 
         this.pixi.ticker.add(this.render.bind(this));
 
-        this.camera = new Camera(this);
-        this.map = new Minimap(this);
-
-        this.inputManager.setupInputs();
-        this.console.readFromLocalStorage();
         setUpCommands(this);
         this.soundManager = new SoundManager(this);
         this.inputManager.generateBindsConfigScreen();
 
         setupUI(this);
 
+        this.camera = new Camera(this);
+        this.map = new Minimap(this);
+
         this.playersContainer.zIndex = ZIndexes.Players;
         this.bulletsContainer.zIndex = ZIndexes.Bullets;
 
         this.music = new Howl({
-            src: this.console.getConfig("cv_use_old_menu_music") ? "./audio/music/old_menu_music.mp3" : "./audio/music/menu_music.mp3",
+            src: this.console.getBuiltInCVar("cv_use_old_menu_music") ? "./audio/music/old_menu_music.mp3" : "./audio/music/menu_music.mp3",
             loop: true
         });
 
         setInterval(() => {
-            if (this.console.getConfig("pf_show_fps")) {
+            if (this.console.getBuiltInCVar("pf_show_fps")) {
                 $("#fps-counter").text(`${Math.round(this.pixi.ticker.FPS)} fps`);
             }
         }, 500);
 
         if (!this.musicPlaying) {
-            const musicVolume = this.console.getConfig("cv_music_volume");
+            const musicVolume = this.console.getBuiltInCVar("cv_music_volume");
 
             this.music.play();
             this.music.volume(musicVolume);
@@ -191,10 +198,6 @@ export class Game {
                     new GameOverPacket(this._playerManager).deserialize(stream);
                     break;
                 }
-                case PacketType.Kill: {
-                    new KillPacket(this._playerManager).deserialize(stream);
-                    break;
-                }
                 case PacketType.KillFeed: {
                     new KillFeedPacket(this._playerManager).deserialize(stream);
                     break;
@@ -231,12 +234,12 @@ export class Game {
                     $("#splash-server-message").show();
                 }
                 $("#btn-spectate").addClass("btn-disabled");
-                if (!this.error) this.endGame(true);
+                if (!this.error) this.endGame();
             }
         };
     }
 
-    endGame(transition: boolean): void {
+    endGame(): void {
         clearTimeout(this._tickTimeoutID);
 
         if (this.activePlayer?.actionSound) {
@@ -249,7 +252,7 @@ export class Game {
         $("canvas").removeClass("active");
         $("#kill-leader-leader").text("Waiting for leader");
         $("#kill-leader-kills-counter").text("0");
-        if (transition) $("#splash-ui").fadeIn();
+        $("#splash-ui").fadeIn();
 
         this.gameStarted = false;
         this.socket.close();
@@ -272,7 +275,7 @@ export class Game {
 
         if (!this.musicPlaying) {
             this.music.stop().play();
-            this.music.volume(this.console.getConfig("cv_music_volume"));
+            this.music.volume(this.console.getBuiltInCVar("cv_music_volume"));
             this.musicPlaying = true;
         }
     }
@@ -300,28 +303,22 @@ export class Game {
         if (!this.gameStarted) return;
         const delta = this.pixi.ticker.deltaMS;
 
-        if (this.console.getConfig("cv_movement_smoothing")) {
+        if (this.console.getBuiltInCVar("cv_movement_smoothing")) {
             for (const player of this.players) {
                 player.updateContainerPosition();
-                if (this.console.getConfig("cv_rotation_smoothing") &&
-                    !(player.isActivePlayer && this.console.getConfig("cv_animate_rotation") === "client")
-                ) player.updateContainerRotation();
+                if (!player.isActivePlayer || this.spectating) player.updateContainerRotation();
             }
-
-            for (const loot of this.loots) loot.updateContainerPosition();
 
             if (this.activePlayer) {
                 this.camera.position = this.activePlayer.container.position;
             }
+
+            for (const loot of this.loots) loot.updateContainerPosition();
         }
 
-        for (const tween of this.tweens) {
-            tween.update();
-        }
+        for (const tween of this.tweens) tween.update();
 
-        for (const bullet of this.bullets) {
-            bullet.update(delta);
-        }
+        for (const bullet of this.bullets) bullet.update(delta);
 
         this.particleManager.update(delta);
 
@@ -333,49 +330,39 @@ export class Game {
 
     processUpdate(updateData: UpdatePacket): void {
         for (const { id, type, data } of updateData.fullDirtyObjects) {
-            let object: GameObject | undefined = this.objects.get(id);
+            const object: GameObject | undefined = this.objects.get(id);
 
             if (object === undefined || object.destroyed) {
-                switch (type.category) {
-                    case ObjectCategory.Player: {
-                        object = new Player(this, id);
-                        this.players.add(object as Player);
-                        break;
-                    }
-                    case ObjectCategory.Obstacle: {
-                        object = new Obstacle(this, type.definition as ObstacleDefinition, id);
-                        break;
-                    }
-                    case ObjectCategory.DeathMarker: {
-                        object = new DeathMarker(this, id);
-                        break;
-                    }
-                    case ObjectCategory.Loot: {
-                        object = new Loot(this, type.definition as LootDefinition, id);
-                        this.loots.add(object as Loot);
-                        break;
-                    }
-                    case ObjectCategory.Building: {
-                        object = new Building(this, type.definition as BuildingDefinition, id);
-                        break;
-                    }
-                    case ObjectCategory.Decal: {
-                        object = new Decal(this, type.definition, id);
-                        break;
-                    }
-                }
+                const ObjectsMapping = {
+                    [ObjectCategory.Player]: Player,
+                    [ObjectCategory.Obstacle]: Obstacle,
+                    [ObjectCategory.DeathMarker]: DeathMarker,
+                    [ObjectCategory.Loot]: Loot,
+                    [ObjectCategory.Building]: Building,
+                    [ObjectCategory.Decal]: Decal
+                };
+
+                type K = typeof type;
+                const newObject = new (
+                    ObjectsMapping[type] as (new (game: Game, id: number, data: Required<ObjectsNetData[K]>) => GameObject)
+                )(this, id, data);
+
+                if (newObject instanceof Loot) this.loots.add(newObject);
+                else if (newObject instanceof Player) this.players.add(newObject);
+
+                this.objects.add(newObject);
             }
 
             if (object) {
                 this.objects.add(object);
-                object.updateFromData(data);
+                object.updateFromData(data, false);
             }
         }
 
         for (const { id, data } of updateData.partialDirtyObjects) {
             const object = this.objects.get(id);
             if (object) {
-                object.updateFromData(data);
+                object.updateFromData(data, false);
             }
         }
         for (const id of updateData.deletedObjects) {

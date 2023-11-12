@@ -201,7 +201,7 @@ export class ConsoleVariables {
 export interface CVarTypeMapping {
     readonly cv_player_name: ConVar<string>
     readonly cv_loadout_skin: ConVar<string>
-    readonly cv_loadout_crosshair: ConVar<string>
+    readonly cv_loadout_crosshair: ConVar<number>
     readonly cv_loadout_top_emote: ConVar<string>
     readonly cv_loadout_right_emote: ConVar<string>
     readonly cv_loadout_bottom_emote: ConVar<string>
@@ -216,10 +216,9 @@ export interface CVarTypeMapping {
     readonly cv_language: ConVar<string>
     readonly cv_region: ConVar<string | undefined>
     readonly cv_camera_shake_fx: ConVar<boolean>
-    readonly cv_animate_rotation: ConVar<"wait_for_server" | "client">
     readonly cv_killfeed_style: ConVar<"text" | "icon">
-    readonly cv_rotation_smoothing: ConVar<boolean>
     readonly cv_movement_smoothing: ConVar<boolean>
+    readonly cv_antialias: ConVar<boolean>
     readonly cv_minimap_minimized: ConVar<boolean>
     readonly cv_leave_warning: ConVar<boolean>
     readonly cv_minimap_transparency: ConVar<number>

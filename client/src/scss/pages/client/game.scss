@@ -8,6 +8,13 @@
     left: 0;
     width: 100%;
     height: 100%;
+
+    // Darkens canvas (for Halloween mode)
+    /*canvas {
+        filter: brightness(0.65) saturate(0.85);
+        position: relative;
+        z-index: -1;
+    }*/
 }
 
 #btn-reload {
@@ -260,11 +267,11 @@
                 }
             }
 
-            .kill-feed-item-victim {
+            &.kill-feed-item-victim {
                 background-color: #cc000075;
             }
 
-            .kill-feed-item-killer {
+            &.kill-feed-item-killer {
                 background-color: #0066cc75;
             }
         }
@@ -567,7 +574,10 @@
     left: 50%;
     transform: translateX(-50%);
     display: flex;
+    width: 225px;
     gap: 10px;
+    justify-content: space-between;
+    flex-wrap: wrap;
 
     @media screen and (max-width: $screen_large) {
         top: 100px;
@@ -577,6 +587,10 @@
             padding: 8px 12px;
             font-size: 14px;
         }
+    }
+
+    #btn-spectate-kill-leader {
+        width: 100%;
     }
 }
 
@@ -866,6 +880,7 @@
     .item-image {
         width: 40px;
         height: 40px;
+        @include drop-shadow;
 
         @media screen and (max-width: $screen_large) {
             width: 30px;

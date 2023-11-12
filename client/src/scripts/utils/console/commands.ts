@@ -1,14 +1,15 @@
-import { InputActions, INVENTORY_MAX_WEAPONS } from "../../../../../common/src/constants";
-import { HealingItems, type HealingItemDefinition } from "../../../../../common/src/definitions/healingItems";
+import { InputActions, INVENTORY_MAX_WEAPONS, SpectateActions } from "../../../../../common/src/constants";
+import { type HealingItemDefinition, HealingItems } from "../../../../../common/src/definitions/healingItems";
 import { Loots } from "../../../../../common/src/definitions/loots";
-import { Scopes, type ScopeDefinition } from "../../../../../common/src/definitions/scopes";
+import { type ScopeDefinition, Scopes } from "../../../../../common/src/definitions/scopes";
 import { absMod } from "../../../../../common/src/utils/math";
-import { reifyDefinition, type ReferenceTo } from "../../../../../common/src/utils/objectDefinitions";
+import { type ReferenceTo } from "../../../../../common/src/utils/objectDefinitions";
 import { v } from "../../../../../common/src/utils/vector";
 import { type Game } from "../../game";
 import { type InputManager } from "../inputManager";
 import { type PossibleError, type Stringable } from "./gameConsole";
 import { ConVar } from "./variables";
+import { SpectatePacket } from "../../packets/sending/spectatePacket";
 
 type CommandExecutor<ErrorType = never> = (this: Game, ...args: Array<string | undefined>) => PossibleError<ErrorType>;
 
@@ -41,7 +42,14 @@ export class Command<Invertible extends boolean = false, ErrorType extends Strin
     private readonly _info: CommandInfo;
     get info(): CommandInfo { return this._info; }
 
-    static createInvertiblePair<ErrorType extends Stringable | never = never>(name: string, on: CommandExecutor<ErrorType>, off: CommandExecutor<ErrorType>, game: Game, infoOn: CommandInfo, infoOff?: CommandInfo): void {
+    static createInvertiblePair<ErrorType extends Stringable | never = never>(
+        name: string,
+        on: CommandExecutor<ErrorType>,
+        off: CommandExecutor<ErrorType>,
+        game: Game,
+        infoOn: CommandInfo,
+        infoOff?: CommandInfo
+    ): void {
         const plus = new Command<true, ErrorType>(
             `+${name}`,
             on,
@@ -63,7 +71,12 @@ export class Command<Invertible extends boolean = false, ErrorType extends Strin
         minus._inverse = plus;
     }
 
-    static createCommand<ErrorType extends Stringable | never = never>(name: string, executor: CommandExecutor<ErrorType>, game: Game, info: CommandInfo): void {
+    static createCommand<ErrorType extends Stringable | never = never>(
+        name: string,
+        executor: CommandExecutor<ErrorType>,
+        game: Game,
+        info: CommandInfo
+    ): void {
         /* eslint-disable no-new */
         new Command(name, executor, game, info);
     }
@@ -123,12 +136,17 @@ export function setUpCommands(game: Game): void {
     const gameConsole = game.console;
     const keybinds = game.inputManager.binds;
 
-    const createMovementCommand = (name: keyof InputManager["movement"]): void => {
+    const createMovementCommand = (name: keyof InputManager["movement"], spectateAction?: SpectateActions): void => {
         Command.createInvertiblePair(
             name,
-            function(): undefined {
-                this.inputManager.movement[name] = true;
-            },
+            spectateAction
+                ? function(): undefined {
+                    this.inputManager.movement[name] = true;
+                    if (this.spectating) this.sendPacket(new SpectatePacket(this.playerManager, spectateAction));
+                }
+                : function(): undefined {
+                    this.inputManager.movement[name] = true;
+                },
             function(): undefined {
                 this.inputManager.movement[name] = false;
             },
@@ -157,9 +175,9 @@ export function setUpCommands(game: Game): void {
     };
 
     createMovementCommand("up");
-    createMovementCommand("left");
+    createMovementCommand("left", SpectateActions.SpectatePrevious);
     createMovementCommand("down");
-    createMovementCommand("right");
+    createMovementCommand("right", SpectateActions.SpectateNext);
 
     // shut
     /*
@@ -205,10 +223,7 @@ export function setUpCommands(game: Game): void {
     Command.createCommand(
         "last_item",
         function(): undefined {
-            this.inputManager.addAction({
-                type: InputActions.EquipItem,
-                slot: this.inputManager.lastItemIndex
-            });
+            this.inputManager.addAction(InputActions.EquipLastItem);
         },
         game,
         {
@@ -226,9 +241,7 @@ export function setUpCommands(game: Game): void {
     Command.createCommand(
         "other_weapon",
         function(): undefined {
-            let index = this.inputManager.activeItemIndex > 1
-                ? 0
-                : 1 - this.inputManager.activeItemIndex;
+            let index = this.inputManager.activeItemIndex === 0 || (this.playerManager.weapons[0] === undefined && this.inputManager.activeItemIndex !== 1) ? 1 : 0;
 
             // fallback to melee if there's no weapon on the slot
             if (this.playerManager.weapons[index] === undefined) index = 2;
@@ -440,7 +453,7 @@ export function setUpCommands(game: Game): void {
 
             game.inputManager.addAction({
                 type: InputActions.UseItem,
-                item: reifyDefinition(idString, Loots)
+                item: Loots.fromString(idString)
             });
         },
         game,
@@ -567,9 +580,13 @@ export function setUpCommands(game: Game): void {
             this.inputManager.emoteWheelPosition = v(mouseX, mouseY);
         },
         function(): undefined {
-            $("#emote-wheel").hide();
-            const emote = this.inputManager.selectedEmote;
-            if (emote) this.inputManager.addAction(emote);
+            if (this.inputManager.emoteWheelActive) {
+                this.inputManager.emoteWheelActive = false;
+                $("#emote-wheel").hide();
+                const emote = this.inputManager.selectedEmote;
+                if (emote) this.inputManager.addAction(emote);
+                this.inputManager.selectedEmote = undefined;
+            }
         },
         game,
         {
@@ -733,7 +750,7 @@ export function setUpCommands(game: Game): void {
                 return { err: `Cannot override built-in command '${name}'` };
             }
 
-            if (gameConsole.vars.has(name)) {
+            if (gameConsole.variables.has(name)) {
                 return { err: `Cannot shadow cvar '${name}'` };
             }
 
@@ -820,7 +837,7 @@ export function setUpCommands(game: Game): void {
         (): undefined => {
             gameConsole.log.raw({
                 main: "List of CVars",
-                detail: `<ul>${gameConsole.vars.dump()}</ul>`
+                detail: `<ul>${gameConsole.variables.dump()}</ul>`
             });
         },
         game,
@@ -851,13 +868,13 @@ export function setUpCommands(game: Game): void {
                 return { err: "Custom CVar name be at least one character long (not including the prefix) and can only contain letters, numbers and underscores." };
             }
 
-            if (gameConsole.vars.has.custom(name)) {
+            if (gameConsole.variables.has.custom(name)) {
                 return { err: `Custom CVar '${name}' already exists. (To change its value to ${value}, do <code>${name}=${value}</code>)` };
             }
 
             const toBoolean = (str: string | undefined): boolean => [undefined, "true", "false", "0", "1"].includes(str);
 
-            gameConsole.vars.declareCVar(new ConVar<Stringable>(name, value, gameConsole, { archive: toBoolean(archive), readonly: toBoolean(readonly) }));
+            gameConsole.variables.declareCVar(new ConVar<Stringable>(name, value, gameConsole, { archive: toBoolean(archive), readonly: toBoolean(readonly) }));
             gameConsole.writeToLocalStorage();
         },
         game,

@@ -2,12 +2,12 @@
 
 import { GasState } from "../../common/src/constants";
 import { clamp, distanceSquared, lerp, vecLerp } from "../../common/src/utils/math";
-import { log } from "../../common/src/utils/misc";
 import { randomPointInsideCircle } from "../../common/src/utils/random";
 import { v, vClone, type Vector } from "../../common/src/utils/vector";
 import { Config, GasMode } from "./config";
 import { GasStages } from "./data/gasStages";
 import { type Game } from "./game";
+import { Logger } from "./utils/misc";
 
 export class Gas {
     stage = 0;
@@ -20,10 +20,10 @@ export class Gas {
     newPosition: Vector;
     currentPosition: Vector;
 
-    oldRadius = GasStages[0].oldRadius;
-    newRadius = GasStages[0].newRadius;
+    oldRadius: number;
+    newRadius: number;
+    currentRadius: number;
 
-    currentRadius = GasStages[0].oldRadius;
     dps = 0;
     ticksSinceLastDamage = 0;
 
@@ -34,9 +34,16 @@ export class Gas {
 
     game: Game;
     timeoutID: NodeJS.Timeout | undefined;
+    mapSize: number;
 
     constructor(game: Game) {
         this.game = game;
+
+        this.mapSize = (this.game.map.width + this.game.map.height) / 2;
+
+        this.oldRadius = GasStages[0].oldRadius * this.mapSize;
+        this.newRadius = GasStages[0].newRadius * this.mapSize;
+        this.currentRadius = GasStages[0].oldRadius * this.mapSize;
 
         this.oldPosition = v(game.map.width / 2, game.map.height / 2);
         this.newPosition = vClone(this.oldPosition);
@@ -51,6 +58,7 @@ export class Gas {
 
         this.ticksSinceLastDamage++;
         this.doDamage = false;
+
         if (this.ticksSinceLastDamage >= 30) {
             this.ticksSinceLastDamage = 0;
             this.doDamage = true;
@@ -73,7 +81,7 @@ export class Gas {
         this.countdownStart = this.game.now;
 
         if (currentStage.preventJoin) {
-            log(`Game #${this.game.id} | Preventing new players from joining`);
+            Logger.log(`Game #${this.game.id} | Preventing new players from joining`);
             this.game.allowJoin = false;
         }
 
@@ -94,10 +102,10 @@ export class Gas {
                 this.newPosition = vClone(this.oldPosition);
             }
             this.currentPosition = vClone(this.oldPosition);
-            this.currentRadius = currentStage.oldRadius;
+            this.currentRadius = currentStage.oldRadius * this.mapSize;
         }
-        this.oldRadius = currentStage.oldRadius;
-        this.newRadius = currentStage.newRadius;
+        this.oldRadius = currentStage.oldRadius * this.mapSize;
+        this.newRadius = currentStage.newRadius * this.mapSize;
         this.dps = currentStage.dps;
         this.dirty = true;
         this.percentageDirty = true;

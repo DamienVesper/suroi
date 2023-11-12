@@ -22,11 +22,15 @@ export class GunItem extends InventoryItem<GunDefinition> {
 
     private _shots = 0;
 
-    private _reloadTimeoutID: NodeJS.Timeout | undefined;
+    private _reloadTimeoutID?: NodeJS.Timeout;
+    private _burstTimeoutID?: NodeJS.Timeout;
+    private _autoFireTimeoutID?: NodeJS.Timeout;
 
-    private _burstTimeoutID: NodeJS.Timeout | undefined;
-
-    private _autoFireTimeoutID: NodeJS.Timeout | undefined;
+    cancelAllTimers(): void {
+        clearTimeout(this._reloadTimeoutID);
+        clearTimeout(this._burstTimeoutID);
+        clearTimeout(this._autoFireTimeoutID);
+    }
 
     cancelReload(): void { clearTimeout(this._reloadTimeoutID); }
 
@@ -56,7 +60,8 @@ export class GunItem extends InventoryItem<GunDefinition> {
         if (
             (!skipAttackCheck && !owner.attacking) ||
             owner.dead ||
-            owner.disconnected
+            owner.disconnected ||
+            this !== this.owner.activeItem
         ) {
             this._shots = 0;
             return;
@@ -98,7 +103,6 @@ export class GunItem extends InventoryItem<GunDefinition> {
             owner.position,
             vRotate(v(definition.length + jitter, 0), owner.rotation) // player radius + gun length
         );
-        // const rotated = vRotate(v(definition.length - jitter, 0), owner.rotation); // player radius + gun length
 
         for (
             const object of
@@ -176,14 +180,14 @@ export class GunItem extends InventoryItem<GunDefinition> {
     }
 
     override useItem(): void {
-        let attackCooldown = this.definition.fireDelay;
-        if (this.definition.fireMode === FireMode.Burst) attackCooldown = this.definition.burstProperties.burstCooldown;
-        if (
-            this.owner.game.now - this._lastUse > attackCooldown &&
-            this.owner.game.now - this._switchDate > this.owner.effectiveSwitchDelay
-        ) {
-            this._useItemNoDelayCheck(true);
-        }
+        const def = this.definition;
+
+        super._bufferAttack(
+            def.fireMode === FireMode.Burst
+                ? def.burstProperties.burstCooldown
+                : def.fireDelay,
+            this._useItemNoDelayCheck.bind(this, true)
+        );
     }
 
     reload(skipFireDelayCheck = false): void {
