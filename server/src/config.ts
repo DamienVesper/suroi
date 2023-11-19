@@ -4,7 +4,8 @@ export enum SpawnMode {
     Random,
     Fixed,
     Center,
-    Radius
+    Radius,
+    PoissonDisc
 }
 export enum GasMode {
     Normal,
@@ -19,6 +20,7 @@ export const Config = {
     mapName: "arena",
 
     spawn: { mode: SpawnMode.Center },
+    // spawn: { mode: SpawnMode.PoissonDisc, radius: 50, maxTries: 100 },
 
     maxPlayersPerGame: 80,
     maxGames: 1,
@@ -81,6 +83,7 @@ export interface ConfigType {
      * SpawnMode.Fixed always spawns the player at the exact position given, ignoring the radius.
      * SpawnMode.Center always spawns the player in the center of the map.
      * SpawnMode.Radius spawns the player at a random location within the circle with the given position and radius.
+     * SpawnMode.PoissonDisc spawns the player at a random location with a minimum distance between players
      */
     readonly spawn: {
         readonly mode: SpawnMode.Random
@@ -93,6 +96,10 @@ export interface ConfigType {
         readonly mode: SpawnMode.Radius
         readonly position: Vector
         readonly radius: number
+    } | {
+        readonly mode: SpawnMode.PoissonDisc
+        readonly radius: number
+        readonly maxTries: number
     }
 
     /**
@@ -147,19 +154,19 @@ export interface ConfigType {
         }
 
         /**
-         * If this option is present, a list of banned IPs will be loaded, either from a local file or from a remote source.
-         * If `url` is specified, the list is loaded from the specified URL (e.g. https://suroi.io/api/bannedIPs).
+         * If this option is present, a list of punishments will be loaded, either from a local file or from a remote source.
+         * If `url` is specified, the list is loaded from the specified URL (e.g. https://suroi.io). Trailing slash not allowed.
          * The specified `password` is sent in the `Password` header.
-         * If `url` is not specified, the list is loaded from `bannedIPs.json`, and it's accessible from `/api/bannedIPs`.
+         * If `url` is not specified, the list is loaded from `punishments.json`, and it's accessible from `/api/punishments`.
          * To access the list, the specified `password` must be provided in the `Password` header.
          */
-        readonly ipBanList?: {
+        readonly punishments?: {
             readonly password: string
             readonly url?: string
         }
 
         /**
-         * Every `refreshDuration` milliseconds, the list of rate limited IPs is cleared, and the list of banned IPs is reloaded if enabled.
+         * Every `refreshDuration` milliseconds, rate limited IPs are cleared, and the list of punishments is reloaded if enabled.
          */
         readonly refreshDuration: number
     }

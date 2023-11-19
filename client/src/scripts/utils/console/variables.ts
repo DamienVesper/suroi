@@ -168,7 +168,7 @@ export class ConsoleVariables {
     getAll(): GameSettings["variables"] {
         const variables: GameSettings["variables"] = {};
 
-        for (const varName in this._userCVars.entries) {
+        for (const varName in this._userCVars.entries()) {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             const cvar = this._userCVars.get(varName)!;
             variables[varName] = { value: cvar.value, flags: cvar.flags };
@@ -218,6 +218,7 @@ export interface CVarTypeMapping {
     readonly cv_camera_shake_fx: ConVar<boolean>
     readonly cv_killfeed_style: ConVar<"text" | "icon">
     readonly cv_movement_smoothing: ConVar<boolean>
+    readonly cv_responsive_rotation: ConVar<boolean>
     readonly cv_antialias: ConVar<boolean>
     readonly cv_minimap_minimized: ConVar<boolean>
     readonly cv_leave_warning: ConVar<boolean>

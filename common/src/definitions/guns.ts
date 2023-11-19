@@ -79,7 +79,7 @@ export const Guns: GunDefinition[] = [
         recoilDuration: 150,
         fireMode: FireMode.Auto,
         shotSpread: 2,
-        moveSpread: 4,
+        moveSpread: 6,
         length: 7.5,
         fists: {
             left: v(120, -2),
@@ -145,7 +145,7 @@ export const Guns: GunDefinition[] = [
         recoilDuration: 120,
         fireMode: FireMode.Auto,
         shotSpread: 4,
-        moveSpread: 7,
+        moveSpread: 11,
         length: 6.7,
         fists: {
             left: v(105, -2),
@@ -181,7 +181,7 @@ export const Guns: GunDefinition[] = [
         recoilDuration: 500,
         fireMode: FireMode.Auto,
         shotSpread: 5,
-        moveSpread: 2,
+        moveSpread: 7,
         jitterRadius: 0.5,
         bulletCount: 9,
         length: 7.7,
@@ -218,7 +218,7 @@ export const Guns: GunDefinition[] = [
         recoilDuration: 550,
         fireMode: FireMode.Single,
         shotSpread: 11,
-        moveSpread: 3,
+        moveSpread: 14,
         jitterRadius: 1.25,
         bulletCount: 10,
         length: 7.9,
@@ -260,8 +260,8 @@ export const Guns: GunDefinition[] = [
         recoilDuration: 600,
         fireMode: FireMode.Single,
         bulletCount: 18,
-        shotSpread: 30,
-        moveSpread: 7,
+        shotSpread: 15,
+        moveSpread: 22,
         jitterRadius: 1.5,
         length: 8,
         fists: {
@@ -300,7 +300,7 @@ export const Guns: GunDefinition[] = [
         fireMode: FireMode.Single,
         bulletCount: 10,
         shotSpread: 11,
-        moveSpread: 3,
+        moveSpread: 14,
         jitterRadius: 1.5,
         length: 6,
         fists: {
@@ -327,20 +327,21 @@ export const Guns: GunDefinition[] = [
     },
     {
         idString: "mosin",
-        name: "M95",
+        name: "Mosin-Nagant",
         itemType: ItemType.Gun,
         ammoType: "762mm",
         ammoSpawnAmount: 20,
         capacity: 5,
-        reloadTime: 3.4,
-        fireDelay: 1400,
-        switchDelay: 1800,
-        speedMultiplier: 0.92,
-        recoilMultiplier: 0.3,
-        recoilDuration: 1500,
+        reloadTime: 0.85,
+        singleReload: true,
+        fireDelay: 900,
+        switchDelay: 900,
+        speedMultiplier: 0.9,
+        recoilMultiplier: 0.45,
+        recoilDuration: 750,
         fireMode: FireMode.Single,
-        shotSpread: 0.5,
-        moveSpread: 4,
+        shotSpread: 1,
+        moveSpread: 2,
         length: 8.7,
         shootOnRelease: true,
         fists: {
@@ -355,10 +356,10 @@ export const Guns: GunDefinition[] = [
             ejectionDelay: 700
         },
         ballistics: {
-            damage: 142.75,
+            damage: 70,
             obstacleMultiplier: 1,
-            speed: 0.45,
-            maxDistance: 300,
+            speed: 0.33,
+            maxDistance: 250,
             tracer: {
                 width: 1.4,
                 length: 2.5
@@ -380,7 +381,7 @@ export const Guns: GunDefinition[] = [
         recoilDuration: 1000,
         fireMode: FireMode.Single,
         shotSpread: 0.3,
-        moveSpread: 0.3,
+        moveSpread: 0.6,
         length: 8.2,
         shootOnRelease: true,
         fists: {
@@ -418,7 +419,7 @@ export const Guns: GunDefinition[] = [
         recoilDuration: 135,
         fireMode: FireMode.Single,
         shotSpread: 2,
-        moveSpread: 3,
+        moveSpread: 5,
         length: 5.1,
         fists: {
             left: v(40, 0),
@@ -444,7 +445,7 @@ export const Guns: GunDefinition[] = [
     },
     {
         idString: "g19",
-        name: "Scoped Glock",
+        name: "G19",
         itemType: ItemType.Gun,
         ammoType: "9mm",
         ammoSpawnAmount: 60,
@@ -455,7 +456,7 @@ export const Guns: GunDefinition[] = [
         recoilDuration: 90,
         fireMode: FireMode.Single,
         shotSpread: 7,
-        moveSpread: 7,
+        moveSpread: 14,
         length: 4.7,
         fists: {
             left: v(40, 0),
@@ -471,10 +472,10 @@ export const Guns: GunDefinition[] = [
         capacity: 15,
         reloadTime: 1.5,
         ballistics: {
-            damage: 1000,
+            damage: 11.75,
             obstacleMultiplier: 1,
-            speed: 1,
-            maxDistance: 250
+            speed: 0.14,
+            maxDistance: 120
         }
     },
     {
@@ -490,7 +491,7 @@ export const Guns: GunDefinition[] = [
         recoilDuration: 90,
         fireMode: FireMode.Auto,
         shotSpread: 12,
-        moveSpread: 7,
+        moveSpread: 19,
         length: 5.1,
         fists: {
             left: v(40, 0),
@@ -527,7 +528,7 @@ export const Guns: GunDefinition[] = [
         recoilDuration: 300,
         fireMode: FireMode.Burst,
         shotSpread: 3,
-        moveSpread: 1,
+        moveSpread: 4,
         length: 5.9,
         fists: {
             left: v(95, -3),
@@ -565,7 +566,7 @@ export const Guns: GunDefinition[] = [
         recoilDuration: 350,
         fireMode: FireMode.Burst,
         shotSpread: 1,
-        moveSpread: 1.5,
+        moveSpread: 2.5,
         length: 8.6,
         fists: {
             left: v(120, -3),
@@ -603,7 +604,7 @@ export const Guns: GunDefinition[] = [
         recoilDuration: 60,
         fireMode: FireMode.Auto,
         shotSpread: 9,
-        moveSpread: 10,
+        moveSpread: 19,
         length: 5.8,
         fists: {
             left: v(85, -6),
@@ -637,7 +638,7 @@ export const Guns: GunDefinition[] = [
         recoilDuration: 150,
         fireMode: FireMode.Auto,
         shotSpread: 2,
-        moveSpread: 2,
+        moveSpread: 4,
         length: 6.55,
         fists: {
             left: v(103, -2),
@@ -671,7 +672,7 @@ export const Guns: GunDefinition[] = [
         recoilDuration: 130,
         fireMode: FireMode.Auto,
         shotSpread: 2,
-        moveSpread: 2,
+        moveSpread: 4,
         length: 7.7,
         fists: {
             left: v(105, -6),
@@ -708,7 +709,7 @@ export const Guns: GunDefinition[] = [
         recoilDuration: 200,
         fireMode: FireMode.Auto,
         shotSpread: 2,
-        moveSpread: 4,
+        moveSpread: 6,
         length: 11.8,
         fists: {
             left: v(140, -10),
@@ -784,7 +785,7 @@ export const Guns: GunDefinition[] = [
         recoilDuration: 140,
         fireMode: FireMode.Single,
         shotSpread: 2,
-        moveSpread: 1.5,
+        moveSpread: 3.5,
         length: 6.9,
         fists: {
             left: v(110, -2),
@@ -860,7 +861,7 @@ export const Guns: GunDefinition[] = [
         recoilDuration: 155,
         fireMode: FireMode.Single,
         shotSpread: 1,
-        moveSpread: 2.5,
+        moveSpread: 3.5,
         length: 7.4,
         fists: {
             left: v(96, -2),
@@ -900,7 +901,7 @@ export const Guns: GunDefinition[] = [
         recoilDuration: 525,
         fireMode: FireMode.Auto,
         shotSpread: 5,
-        moveSpread: 9,
+        moveSpread: 14,
         length: 7.7,
         fists: {
             left: v(115, -1),
@@ -1023,7 +1024,7 @@ export const Guns: GunDefinition[] = [
         recoilDuration: 550,
         fireMode: FireMode.Single,
         shotSpread: 11,
-        moveSpread: 3,
+        moveSpread: 14,
         killstreak: true,
         consistentPatterning: true,
         bulletCount: 10,
