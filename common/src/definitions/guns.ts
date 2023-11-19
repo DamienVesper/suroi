@@ -182,7 +182,6 @@ export const Guns: GunDefinition[] = [
         fireMode: FireMode.Auto,
         shotSpread: 5,
         moveSpread: 7,
-        jitterRadius: 0.5,
         bulletCount: 9,
         length: 7.7,
         fists: {
@@ -219,7 +218,6 @@ export const Guns: GunDefinition[] = [
         fireMode: FireMode.Single,
         shotSpread: 11,
         moveSpread: 14,
-        jitterRadius: 1.25,
         bulletCount: 10,
         length: 7.9,
         fists: {
@@ -262,7 +260,6 @@ export const Guns: GunDefinition[] = [
         bulletCount: 18,
         shotSpread: 15,
         moveSpread: 22,
-        jitterRadius: 1.5,
         length: 8,
         fists: {
             left: v(120, -1),
@@ -275,7 +272,7 @@ export const Guns: GunDefinition[] = [
             position: v(4, 0.6)
         },
         ballistics: {
-            damage: 5,
+            damage: 6.5,
             obstacleMultiplier: 0.5,
             speed: 0.12,
             maxDistance: 40,
@@ -301,7 +298,6 @@ export const Guns: GunDefinition[] = [
         bulletCount: 10,
         shotSpread: 11,
         moveSpread: 14,
-        jitterRadius: 1.5,
         length: 6,
         fists: {
             left: v(95, -2),
@@ -319,7 +315,7 @@ export const Guns: GunDefinition[] = [
             damage: 10,
             obstacleMultiplier: 1,
             speed: 0.16,
-            maxDistance: 40,
+            maxDistance: 48,
             tracer: {
                 length: 0.5
             }
@@ -327,21 +323,20 @@ export const Guns: GunDefinition[] = [
     },
     {
         idString: "mosin",
-        name: "Mosin-Nagant",
+        name: "M95",
         itemType: ItemType.Gun,
         ammoType: "762mm",
         ammoSpawnAmount: 20,
         capacity: 5,
-        reloadTime: 0.85,
-        singleReload: true,
-        fireDelay: 900,
-        switchDelay: 900,
-        speedMultiplier: 0.9,
-        recoilMultiplier: 0.45,
-        recoilDuration: 750,
+        reloadTime: 3.4,
+        fireDelay: 1400,
+        switchDelay: 1800,
+        speedMultiplier: 0.92,
+        recoilMultiplier: 0.3,
+        recoilDuration: 1500,
         fireMode: FireMode.Single,
-        shotSpread: 1,
-        moveSpread: 2,
+        shotSpread: 0.5,
+        moveSpread: 4,
         length: 8.7,
         shootOnRelease: true,
         fists: {
@@ -356,10 +351,10 @@ export const Guns: GunDefinition[] = [
             ejectionDelay: 700
         },
         ballistics: {
-            damage: 70,
+            damage: 142.75,
             obstacleMultiplier: 1,
-            speed: 0.33,
-            maxDistance: 250,
+            speed: 0.45,
+            maxDistance: 300,
             tracer: {
                 width: 1.4,
                 length: 2.5
@@ -396,7 +391,7 @@ export const Guns: GunDefinition[] = [
             ejectionDelay: 450
         },
         ballistics: {
-            damage: 79,
+            damage: 75,
             obstacleMultiplier: 1,
             speed: 0.4,
             maxDistance: 280,
@@ -559,7 +554,7 @@ export const Guns: GunDefinition[] = [
         ammoSpawnAmount: 90,
         capacity: 30,
         reloadTime: 2.2,
-        fireDelay: 30,
+        fireDelay: 60,
         switchDelay: 400,
         speedMultiplier: 0.92,
         recoilMultiplier: 0.75,
@@ -586,7 +581,7 @@ export const Guns: GunDefinition[] = [
         },
         burstProperties: {
             shotsPerBurst: 3,
-            burstCooldown: 350
+            burstCooldown: 240
         }
     },
     {
