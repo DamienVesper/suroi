@@ -17,3 +17,4 @@ server/bannedIPs.json
 # try to prevent chpster moments from happening
 *.desktop
 *.css
+.pnpm-store/
