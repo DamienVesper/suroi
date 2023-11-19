@@ -40,10 +40,6 @@ export const Config = {
             duration: 3000
         },
 
-        ipBanList: {
-            password: "ldv"
-        },
-
         refreshDuration: 6e4
     },
 
