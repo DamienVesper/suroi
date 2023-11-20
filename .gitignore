@@ -17,4 +17,9 @@ punishments.json
 # try to prevent chpster moments from happening
 *.desktop
 *.css
+
+# try to prevent DamienVesper moments from happening
 .pnpm-store/
+.npm/
+server/bannedIPs.json
+
