@@ -27,7 +27,7 @@ const config = merge(common, {
         devMiddleware: { publicPath: "http://127.0.0.1:3000" },
         static: { directory: path.resolve(__dirname, "../public") },
         historyApiFallback: true,
-        port: 3000
+        port: 7010
     },
 
     module: {
