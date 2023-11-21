@@ -198,6 +198,7 @@ export const Maps: Record<string, MapDefinition> = {
         height: 512,
         beachSize: 16,
         oceanSize: 40,
+        rivers: -1,
         genCallback: (map: Map) => {
             // Function to generate all game loot items
             const genLoots = (pos: Vector, yOff: number, xOff: number): void => {
@@ -229,8 +230,8 @@ export const Maps: Record<string, MapDefinition> = {
             };
 
             // Fixed obstacles
-            const obstacles = [
-                { id: "rock", pos: v(10, 10) },
+            const obstacles = []; 
+/*                { id: "rock", pos: v(10, 10) },
                 { id: "rock", pos: v(30, 40) },
                 { id: "rock", pos: v(30, 80) },
                 { id: "regular_crate", pos: v(20, 15) },
@@ -241,7 +242,7 @@ export const Maps: Record<string, MapDefinition> = {
                 { id: "oil_tank", pos: v(120, 25) },
                 { id: "birch_tree", pos: v(110, 50) }
             ];
-
+*/
             const center = v(map.width / 2, map.height / 2);
 
             for (const obstacle of obstacles) {
