@@ -4,13 +4,13 @@ import common from "./vite.common";
 
 const config: UserConfig = {
     server: {
-        port: 3000,
+        port: 7010,
         strictPort: true,
         host: "0.0.0.0"
 
     },
     preview: {
-        port: 3000,
+        port: 7010,
         strictPort: true,
         host: "0.0.0.0"
     },

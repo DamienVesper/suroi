@@ -8,7 +8,7 @@
     "build": "vite build",
     "dev": "vite",
     "preview": "vite preview",
-    "start": "sirv dist --no-clear -p 3000"
+    "start": "sirv dist --no-clear -p 7010"
   },
   "engines": {
     "node": ">=18.8.0"
