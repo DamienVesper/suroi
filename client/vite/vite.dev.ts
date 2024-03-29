@@ -6,13 +6,13 @@ const config: UserConfig = {
     server: {
         port: 7010,
         strictPort: true,
-        host: "0.0.0.0"
+        host: true
 
     },
     preview: {
         port: 7010,
         strictPort: true,
-        host: "0.0.0.0"
+        host: true
     },
 
     define: {
