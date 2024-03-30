@@ -1,6 +1,6 @@
 export const Config = {
     regions: {
-        dev: { name: "CO-US01", address: "dv.suroi.io:45026", https: false }
+        dev: { name: "CO-US01", address: "dv.suroi.io", https: true }
     },
     defaultRegion: "na",
     mode: "normal"
